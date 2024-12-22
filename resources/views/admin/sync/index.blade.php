@@ -3,15 +3,15 @@
 @section('title', 'Sincronizador de Datos')
 
 @section('content_header')
-    <h1 class="text-center">Sincronizador WooCommerce -> SAP</h1>
+    <h1>Sincronizador</h1>
 @stop
 
 @section('content')
     @include('resources.alerts')
 
     <section>
-        <div class="card mx-5">
-            <div class="card-body">
+        <div class="card">
+            <div class="card-header gray-200">
                 <!-- Contenedor de los botones -->
                 <div class="d-flex justify-content-center align-items-center flex-wrap" style="min-height:150px;">
                     <button id="sync-woocommerce-sap" class="btn btn-primary btn-lg mx-3 my-2" style="width: 250px;">
@@ -21,6 +21,9 @@
                         <i class="fas fa-sync"></i> SAP a WooCommerce
                     </button>
                 </div>
+            </div>
+
+            <div class="card-body">
 
                 <!-- Consola -->
                 <div style="background-color: #1e1e1e; color: #d4d4d4; height: 350px; overflow-y: auto; font-family: monospace; font-size: 14px; padding: 10px; border-radius: 5px;" id="console">
@@ -30,7 +33,7 @@
                 <!-- Botones de descarga -->
                 <div class="d-flex justify-content-center align-items-center flex-wrap mt-3">
                     <button id="download-console" class="btn btn-secondary btn-lg mx-3 my-2" style="width: 250px;" disabled>
-                        <i class="fas fa-download"></i> Descargar Consola
+                        <i class="fas fa-file"></i> Descargar Consola
                     </button>
                     <button id="download-data" class="btn btn-info btn-lg mx-3 my-2" style="width: 250px;" disabled>
                         <i class="fas fa-download"></i> Descargar Datos
@@ -82,6 +85,12 @@
             background-color: #5a6268;
             border-color: #545b62;
         }
+
+        /* .indented {
+            margin-left: 20px;
+            display: block;
+        } */
+
     </style>
 @stop
 
@@ -189,6 +198,7 @@
         function syncEntity(entity, path) {
             return new Promise((resolve, reject) => {
                 logToConsole(`Obteniendo datos de ${entity}...`);
+
                 fetch(path, {
                     method: 'POST',
                     headers: {
@@ -222,9 +232,11 @@
         }
 
         function logToConsole(message) {
-            const consoleElement        = document.getElementById('console');
-            const timestamp             = new Date().toLocaleTimeString();
-            consoleElement.innerHTML    += `<p>[${timestamp}] ${message}</p>`;
+            const consoleElement    = document.getElementById('console');
+            const timestamp         = new Date().toLocaleTimeString();
+            const formattedMessage  = message.replace(/\n/g, '<br><span class="indented">');
+
+            consoleElement.innerHTML    += `<p>[${timestamp}] ${formattedMessage}</p>`;
             consoleElement.scrollTop    = consoleElement.scrollHeight;
         }
 

@@ -25,17 +25,37 @@ class SapController extends Controller
 
         try {
             $data       = $this->getData($entity);
-            $message    = "Se han encontrado " . count($data) . " $entity.";
+            $message    = "Se han encontrado " . count($data) . " $entity.\n";
 
-            $this->syncService->syncToSap($data, $entity);
+            $rows       = $this->syncService->syncToWooCommerce($data, $entity);
 
-            $message .= " Sincronizando $entity... $entity sincronizados exitosamente.";
+            $successCount   = 0;
+            $errorCount     = 0;
+            $errorDetails   = [];
+
+            foreach ($rows as $row) {
+                if ($row['hasError']) {
+                    $errorCount++;
+                    $errorDetails[] = $row['message'];
+                } else {
+                    $successCount++;
+                }
+            }
+
+            $message .= "Sincronización completada: $successCount $entity sincronizados exitosamente y $errorCount con errores.\n";
+
+            if ($errorCount > 0) {
+                $message .= "Detalles de los errores:\n" . implode("\n", $errorDetails);
+            }
 
             return response()->json([
-                'success'   => true,
-                'message'   => $message,
-                'count'     => count($data),
-                'data'      => $data,
+                'success'       => true,
+                'message'       => $message,
+                'count'         => count($data),
+                'data'          => $data,
+                'successCount'  => $successCount,
+                'errorCount'    => $errorCount,
+                'errorDetails'  => $errorDetails,
             ]);
 
         } catch (\Exception $e) {

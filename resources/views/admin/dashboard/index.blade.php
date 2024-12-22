@@ -8,20 +8,26 @@
 
 @section('content')
     <div class="row px-2 mt-5">
-        <!-- EMPRESAS REGISTRADAS -->
-        @can('Ver Empresas')
-            <div class="col small-box bg-secondary mr-2">
-                <div class="inner">
-                    <h3>{{ $companies->count() }}</h3>
-                    <p>Empresas</p>
+        <!-- TEXTO DE BIENVENIDA Y EXPLICACIÓN -->
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">¡Bienvenido al Panel de Servicio!</h4>
+                    <p class="card-text">
+                        Este panel te permite sincronizar datos entre <strong>WooCommerce - SAP</strong> de manera eficiente. 
+                        Puedes realizar las siguientes acciones:
+                    </p>
+                    <ul>
+                        <li>Sincronizar Productos.</li>
+                        <li>Sincronizar Clientes.</li>
+                        <li>Sincronizar Pedidos.</li>
+                    </ul>
+                    <p class="card-text">
+                        Usa los botones disponibles para iniciar las sincronizaciones o gestionar los datos según sea necesario.
+                        Si tienes dudas, puedes contactar al administrador.
+                    </p>
                 </div>
-
-                <div class="icon">
-                    <i class="far fa-building"></i>
-                </div>
-
-                <a href="{{route('admin.companies.index')}}" class="small-box-footer">Ver Empresas <i class="fas fa-arrow-circle-right"></i></a>
             </div>
-        @endcan
+        </div>
     </div>
 @stop

@@ -22,21 +22,24 @@ class SyncService
      */
     public function syncToSap(array $data, string $endpoint)
     {
-        return true;
-        // try {
-        //     $response = Http::withHeaders([
-        //         'Authorization' => 'Bearer ' . $this->sapApiKey,
-        //         'Content-Type'  => 'application/json',
-        //     ])->post($this->sapBaseUrl . '/' . $endpoint, $data);
+        $response = [];
 
-        //     if ($response->failed()) {
-        //         throw new \Exception('Error al sincronizar con SAP: ' . $response->body());
-        //     }
+        foreach ($data as $index => $row) {
+            $hasError = random_int(0, 1);
 
-        //     return $response->json();
-        // } catch (\Exception $e) {
-        //     throw new \Exception('Error en la sincronización con SAP: ' . $e->getMessage());
-        // }
+            $message = $hasError
+                ? "Error en la sincronización. El Item en la posición $index tiene un problema."
+                : "Sincronización exitosa para el Item en la posición $index.";
+
+            $response[] = [
+                'index'     => $index,
+                'row'       => $row,
+                'hasError'  => $hasError,
+                'message'   => $message,
+            ];
+        }
+
+        return $response;
     }
 
     /**
@@ -44,9 +47,9 @@ class SyncService
      */
     public function syncToWooCommerce(array $data, string $endpoint)
     {
-        $responses      = [];
+        $responses = [];
 
-        $woocommerce    = new Client(
+        $woocommerce = new Client(
             config('woocommerce.api_url'),
             config('woocommerce.consumer_key'),
             config('woocommerce.consumer_secret'),
@@ -56,29 +59,33 @@ class SyncService
             ]
         );
 
-        foreach ($data as $item) {
+        foreach ($data as $index => $item) {
             try {
-                $existingResource   = $woocommerce->get($endpoint, ['id' => $item['id'] ?? null]);
+                $existingResource = $woocommerce->get($endpoint, ['id' => $item['id'] ?? null]);
 
                 if (!empty($existingResource)) {
                     $resourceId = $existingResource[0]->id;
                     $response   = $woocommerce->put("{$endpoint}/{$resourceId}", $item);
-
+                    $message    = "Sincronización exitosa para el Item en la posición $index (actualizado).";
                 } else {
-                    $response = $woocommerce->post($endpoint, $item);
-
+                    $response   = $woocommerce->post($endpoint, $item);
+                    $message    = "Sincronización exitosa para el Item en la posición $index (creado).";
                 }
 
                 $responses[] = [
-                    'status' => 'success',
-                    'data'   => $response,
+                    'index'     => $index,
+                    'row'       => $item,
+                    'hasError'  => false,
+                    'message'   => $message,
+                    'response'  => $response,
                 ];
 
             } catch (\Exception $e) {
                 $responses[] = [
-                    'status'  => 'error',
-                    'message' => $e->getMessage(),
-                    'data'    => $item,
+                    'index'     => $index,
+                    'row'       => $item,
+                    'hasError'  => true,
+                    'message'   => "Error en la sincronización para el Item en la posición $index:\n" . $e->getMessage(),
                 ];
             }
         }

@@ -25,7 +25,52 @@ class WooCommerceController extends Controller
 
         try {
             $data       = $this->getData($entity);
-            $message    = "Se han encontrado " . count($data) . " $entity.";
+            $message    = "Se han encontrado " . count($data) . " $entity.\n";
+
+            $rows       = $this->syncService->syncToSap($data, $entity);
+
+            $successCount   = 0;
+            $errorCount     = 0;
+            $errorDetails   = [];
+
+            foreach ($rows as $row) {
+                if ($row['hasError']) {
+                    $errorCount++;
+                    $errorDetails[] = $row['message'];
+                } else {
+                    $successCount++;
+                }
+            }
+
+            $message .= "Sincronización completada: $successCount $entity sincronizados exitosamente y $errorCount con errores.\n";
+
+            if ($errorCount > 0) {
+                $message .= "Detalles de los errores:\n" . implode("\n", $errorDetails);
+            }
+
+            return response()->json([
+                'success'       => true,
+                'message'       => $message,
+                'count'         => count($data),
+                'data'          => $data,
+                'successCount'  => $successCount,
+                'errorCount'    => $errorCount,
+                'errorDetails'  => $errorDetails,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+
+        set_time_limit(0);
+        ini_set('memory_limit', '-1');
+
+        try {
+            $data       = $this->getData($entity);
+            $message    = "Se han encontrado " . count($data) . " $entity.\n";
 
             $this->syncService->syncToSap($data, $entity);
 
