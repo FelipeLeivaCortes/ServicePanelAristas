@@ -1,0 +1,14 @@
+.td_btn {
+    width: 20px;
+}
+
+.link-button {
+    background: none;
+    border: none;
+    color: blue; /* Cambia el color según tu diseño */
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+    font: inherit;
+    border-radius: 0; /* Opcional: quitar esquinas redondeadas */
+}
