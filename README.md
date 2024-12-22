@@ -23,3 +23,4 @@ php artisan serve
 
 Se recomienda instalar los siguientes plugins para Visual Studio Code
 - SQLite Viewer 
+
